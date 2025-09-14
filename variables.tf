@@ -52,14 +52,46 @@ variable "ami" {
   default     = ""
 }
 
-variable "os-type" {
-  description = "Operating system type for the instance. Options are 'ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-23.04', 'ubuntu-23.10', 'ubuntu-24.04', 'ubuntu-25.04'"
+variable "os" {
+  description = "Operating system for the instance. Currently only 'ubuntu' is supported."
   type        = string
-  default     = "ubuntu-22.04"
+  default     = "ubuntu"
 
   validation {
-    condition     = contains(["ubuntu-20.04", "ubuntu-22.04", "ubuntu-23.04", "ubuntu-23.10", "ubuntu-24.04", "ubuntu-25.04"], var.os-type)
-    error_message = "Invalid OS type. Allowed values are 'ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-23.04', 'ubuntu-23.10', 'ubuntu-24.04', 'ubuntu-25.04'."
+    condition     = contains(["ubuntu"], var.os)
+    error_message = "Invalid OS. Only 'ubuntu' is supported currently."
+  }
+  
+}
+
+variable "os-version" {
+  description = <<-EOT
+    Operating system version for the instance.
+
+    Supported Ubuntu versions:
+      - 20.04 (Focal Fossa LTS)
+      - 22.04 (Jammy Jellyfish LTS)
+      - 23.04 (Lunar Lobster)
+      - 23.10 (Mantic Minotaur)
+      - 24.04 (Noble Numbat LTS)
+      - 25.04 (Plucky Puffin)
+
+      - LTS (Long Term Support) releases (20.04, 22.04, 24.04) receive 5 years of standard support and can be extended with Ubuntu Pro for up to 10 years. Interim releases (23.04, 23.10, 25.04) are supported for 9 months and intended for rapid development or testing.
+      
+    Supported Amazon Linux versions:
+      - 2 (Amazon Linux 2, LTS)
+      - 2023 (Amazon Linux 2023, current generation)
+
+      - Amazon Linux 2 is supported with regular updates as an AWS LTS platform. Amazon Linux 2023 is the latest release with ongoing updates and compatibility with AWS services.
+
+    Please choose the value based on your requirements and refer to official documentation for extended maintenance options.
+  EOT
+  type        = string
+  default     = "22-04"
+
+  validation {
+    condition     = contains(["20-04", "22-04", "23-04", "23-10", "24-04", "25-04"], var.os-version)
+    error_message = "Invalid OS type. Allowed values are '20-04', '22-04', '23-04', '23-10', '24-04', '25-04'."
   }
 }
 
