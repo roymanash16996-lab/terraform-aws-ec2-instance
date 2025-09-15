@@ -10,11 +10,6 @@ locals {
   valid_ubuntu_versions = ["20-04", "22-04", "23-04", "23-10", "24-04", "25-04"]
   valid_amazon_versions = ["2", "2023"]
 
-  is_valid = (
-    (var.os == "ubuntu" && contains(local.valid_ubuntu_versions, var.os-version)) ||
-    (var.os == "amazon-linux" && contains(local.valid_amazon_versions, var.os-version))
-  )
-
   image-required = "${var.os}-${var.os-version}"
 
   image-map = {
