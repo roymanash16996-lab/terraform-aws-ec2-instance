@@ -8,6 +8,12 @@ variable "create_instance" {
   default     = true
 }
 
+variable "create_security_group" {
+  description = "Flag to create a security group"
+  type        = bool
+  default     = false
+}
+
 # variable "instance_count" {
 #   description = "Number of EC2 instances to create"
 #   type        = number
@@ -30,8 +36,8 @@ variable "vpc_id" {
   default     = ""
 }
 
-variable "subnet_type" {
-  description = "Type of subnet for the instance. Options are 'public', 'private-with-nat', 'private-isolated'. Default is 'public'. Options are case-sensitive and need to be mentioned in Subnet name."
+variable "subnet_id" {
+  description = "ID of the subnet where the instance will be deployed."
   type        = string
   default     = ""
 }
@@ -61,7 +67,7 @@ variable "os" {
     condition     = contains(["ubuntu"], var.os)
     error_message = "Invalid OS. Only 'ubuntu' is supported currently."
   }
-  
+
 }
 
 variable "os-version" {
@@ -87,11 +93,14 @@ variable "os-version" {
     Please choose the value based on your requirements and refer to official documentation for extended maintenance options.
   EOT
   type        = string
-  default     = "22-04"
+  default     = "23-04"
 
   validation {
-    condition     = contains(["20-04", "22-04", "23-04", "23-10", "24-04", "25-04"], var.os-version)
-    error_message = "Invalid OS type. Allowed values are '20-04', '22-04', '23-04', '23-10', '24-04', '25-04'."
+    condition = (
+      (var.os == "ubuntu" && contains(local.valid_ubuntu_versions, var.os-version)) ||
+      (var.os == "amazon-linux" && contains(local.valid_amazon_versions, var.os-version))
+    )
+    error_message = "Invalid os-version for the selected os. Please select a matching version."
   }
 }
 
@@ -126,4 +135,19 @@ variable "instance_type" {
   description = "Type of the EC2 instance"
   type        = string
   default     = "t3.micro"
+}
+
+variable "security_group_ids" {
+  description = "List of security group IDs to associate with the instance"
+  type        = list(string)
+  default     = []
+}
+
+variable "security_group_details" {
+  description = "List of objects containing security group details to create and associate with the instance. Each object should contain the following keys: name, description, create_before_destroy, use_name_prefix, revoke_rules_on_delete, security_group_id, ingress_rules, egress_rules, tags. See module documentation for details on each key."
+  type        = list(object({
+    name        = string
+    description = string
+  }))
+  default     = []  
 }
