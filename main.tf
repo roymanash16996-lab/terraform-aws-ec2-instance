@@ -8,4 +8,10 @@ resource "aws_instance" "this" {
   subnet_id     = local.subnet_id
 
   vpc_security_group_ids = local.security_group_ids
+
+  lifecycle {
+    ignore_changes = [ 
+      module.security_group
+     ]
+  }
 }
