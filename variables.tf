@@ -144,9 +144,8 @@ variable "security_group_ids" {
 }
 
 variable "security_group_details" {
-  description = "List of objects containing security group details to create and associate with the instance. Each object should contain: name, description, ingress_rules, and egress_rules. See documentation for rule structure."
-  type = list(object({
-    name        = string
+  description = "Map of objects containing security group details to create and associate with the instance. Each key is the security group name. Each object should contain: description, ingress_rules, and egress_rules. See documentation for rule structure."
+  type = map(object({
     description = string
     ingress_rules = list(object({
       ip_protocol                  = string
@@ -169,12 +168,12 @@ variable "security_group_details" {
       description                  = optional(string, "Default egress rule description")
     }))
   }))
-  default = []
+  default = {}
 
   # Validation: Each ingress rule must specify exactly one mutually exclusive source type.
   validation {
     condition = alltrue([
-      for sg in var.security_group_details : alltrue([
+      for sg in values(var.security_group_details) : alltrue([
         for rule in sg.ingress_rules : (
           (
             (rule.cidr_ipv4 != "" ? 1 : 0) +
@@ -191,7 +190,7 @@ variable "security_group_details" {
   # Validation: Each egress rule must specify exactly one mutually exclusive destination type.
   validation {
     condition = alltrue([
-      for sg in var.security_group_details : alltrue([
+      for sg in values(var.security_group_details) : alltrue([
         for rule in sg.egress_rules : (
           (
             (rule.cidr_ipv4 != "" ? 1 : 0) +
