@@ -144,10 +144,64 @@ variable "security_group_ids" {
 }
 
 variable "security_group_details" {
-  description = "List of objects containing security group details to create and associate with the instance. Each object should contain the following keys: name, description, create_before_destroy, use_name_prefix, revoke_rules_on_delete, security_group_id, ingress_rules, egress_rules, tags. See module documentation for details on each key."
-  type        = list(object({
+  description = "List of objects containing security group details to create and associate with the instance. Each object should contain: name, description, ingress_rules, and egress_rules. See documentation for rule structure."
+  type = list(object({
     name        = string
     description = string
+    ingress_rules = list(object({
+      ip_protocol                  = string
+      from_port                    = optional(number)
+      to_port                      = optional(number)
+      cidr_ipv4                    = optional(string, "")
+      cidr_ipv6                    = optional(string, "")
+      prefix_list_id               = optional(string, "")
+      referenced_security_group_id = optional(string, "")
+      description                  = optional(string, "Default ingress rule description")
+    }))
+    egress_rules = list(object({
+      ip_protocol                  = string
+      from_port                    = optional(number)
+      to_port                      = optional(number)
+      cidr_ipv4                    = optional(string, "")
+      cidr_ipv6                    = optional(string, "")
+      prefix_list_id               = optional(string, "")
+      referenced_security_group_id = optional(string, "")
+      description                  = optional(string, "Default egress rule description")
+    }))
   }))
-  default     = []  
+  default = []
+
+  # Validation: Each ingress rule must specify exactly one mutually exclusive source type.
+  validation {
+    condition = alltrue([
+      for sg in var.security_group_details : alltrue([
+        for rule in sg.ingress_rules : (
+          (
+            (rule.cidr_ipv4 != "" ? 1 : 0) +
+            (rule.cidr_ipv6 != "" ? 1 : 0) +
+            (rule.prefix_list_id != "" ? 1 : 0) +
+            (rule.referenced_security_group_id != "" ? 1 : 0)
+          ) == 1
+        )
+      ])
+    ])
+    error_message = "Each ingress rule in security_group_details must specify exactly one of: cidr_ipv4, cidr_ipv6, prefix_list_id, or referenced_security_group_id."
+  }
+
+  # Validation: Each egress rule must specify exactly one mutually exclusive destination type.
+  validation {
+    condition = alltrue([
+      for sg in var.security_group_details : alltrue([
+        for rule in sg.egress_rules : (
+          (
+            (rule.cidr_ipv4 != "" ? 1 : 0) +
+            (rule.cidr_ipv6 != "" ? 1 : 0) +
+            (rule.prefix_list_id != "" ? 1 : 0) +
+            (rule.referenced_security_group_id != "" ? 1 : 0)
+          ) == 1
+        )
+      ])
+    ])
+    error_message = "Each egress rule in security_group_details must specify exactly one of: cidr_ipv4, cidr_ipv6, prefix_list_id, or referenced_security_group_id."
+  }
 }
