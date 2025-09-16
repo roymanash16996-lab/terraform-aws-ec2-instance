@@ -10,8 +10,8 @@ resource "aws_instance" "this" {
   vpc_security_group_ids = local.security_group_ids
 
   lifecycle {
-    ignore_changes = [ 
-      module.security_group
+    ignore_changes = [
+      vpc_security_group_ids
      ]
   }
 }
