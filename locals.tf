@@ -27,4 +27,8 @@ locals {
   ami = var.ami != "" ? var.ami : (
     var.os == "ubuntu" ? data.aws_ami.default-ubuntu[0].id : ""
   )
+
+  security_group_ids = var.security_group_ids != [] ? var.security_group_ids : (
+    var.create_security_group ? [for sg in module.security_group : sg.security_group_id] : [data.aws_security_group.default[0].id]
+  )
 }

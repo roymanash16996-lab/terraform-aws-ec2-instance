@@ -5,5 +5,5 @@ resource "aws_instance" "this" {
   instance_type = var.instance_type
   subnet_id     = local.subnet_id
 
-  vpc_security_group_ids = var.security_group_ids != [] ? var.security_group_ids : [data.aws_security_group.default[0].id]
+  vpc_security_group_ids = local.security_group_ids
 }
