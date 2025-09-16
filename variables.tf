@@ -146,7 +146,8 @@ variable "security_group_ids" {
 variable "security_group_details" {
   description = "Map of objects containing security group details to create and associate with the instance. Each key is the security group name. Each object should contain: description, ingress_rules, and egress_rules. See documentation for rule structure."
   type = map(object({
-    description = string
+    security_group_name        = optional(string)
+    security_group_description = optional(string)
     ingress_rules = list(object({
       ip_protocol                  = string
       from_port                    = optional(number)
