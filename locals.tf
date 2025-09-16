@@ -1,7 +1,7 @@
 locals {
   create = var.create_instance
 
-  resource_name = var.name != "" ? var.name : "terraform-${substr(md5(timestamp()), 0, 8)}"
+  resource_name = var.name != "" ? var.name : "terraform-${substr(md5(time_static.start.rfc3339), 0, 8)}"
 
   vpc_id    = var.vpc_id == "" ? data.aws_vpc.default[0].id : var.vpc_id
   subnet_id = var.subnet_id == "" ? data.aws_subnet.default[0].id : var.subnet_id

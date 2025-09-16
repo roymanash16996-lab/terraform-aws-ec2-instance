@@ -1,3 +1,5 @@
+resource "time_static" "start" {}
+
 resource "aws_instance" "this" {
   count = local.create ? 1 : 0
 
